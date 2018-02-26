@@ -60,10 +60,6 @@ export default {
 }
 </script>
 <style>
-  .image{
-    width: 100%;
-    overflow:hidden;
-  }
   .coll{
     display:flex;
     align-items: center;

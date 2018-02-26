@@ -1,48 +1,70 @@
 <template>
-  <div>
+  <el-main>
     <el-row>
-      <el-col :span="20">
-        <el-input v-model="illust_id" placeholder="illust_id"></el-input>
+      <el-col :span="18">
+        <el-input v-model="param" placeholder="不会用看About"></el-input>
       </el-col>
-      <el-col :span="4">
-        <el-button @click="getImgs()" style="width: 98%" :loading="loading">查询</el-button>
+      <el-col :span="6">
+        <el-button @click="getImgs()" :loading="loading" style="width:98%">查询</el-button>
       </el-col>
     </el-row>
     <el-table :data="imgs">
-      <el-table-column label="Date" align="center">
+      <el-table-column label="Date" align="center" sortable sort-by="wdate">
         <template slot-scope="scope">
-          <router-link :to="'/dayView/' + scope.row.wdate"><el-button type="text">{{scope.row.wdate}}</el-button></router-link>
+          <router-link :to="'/dayView/' + scope.row.wdate" target="_blank"><el-button type="text">{{scope.row.wdate}}</el-button></router-link>
         </template>
       </el-table-column>
       <el-table-column prop="title" label="Title" align="center"></el-table-column>
-      <el-table-column prop="rank" label="Rank(Today/Yesterday)" align="center">
+      <el-table-column prop="rank" label="Rank(Today/Yesterday)" align="center" sortable :sort-by="sortBy">
         <template slot-scope="scope">
           #{{scope.row.rank}} ({{scope.row.yes_rank ? '#' + scope.row.yes_rank : '未上榜'}})
         </template>
       </el-table-column>
     </el-table>
-  </div>
+  </el-main>
 </template>
 <script>
 export default {
   data () {
     return {
       imgs: [],
-      illust_id: '',
+      param: '',
       loading: false,
-      apiUrl: this.apiUrl
+      apiUrl: this.apiUrl,
+      sortBy: ['rank', 'yes_rank']
     }
   },
   methods: {
     getImgs () {
-      this.loading = true
-      if (this.illust_id) {
-        let self = this
-        this.$http.get(this.apiUrl + 'img/id/' + this.illust_id).then(function (response) {
-          self.imgs = response.data
-          self.loading = false
-        })
+      let a = this.param.split(':')
+      if (a.length <= 1 || !a[1]) {
+        this.errorMe()
+        return
       }
+      let b = this.param.slice(a[0].length + 1)
+      let u = 'img/id/'
+      if (a[0] === 'tag') {
+        u = 'img/search/tag/'
+      } else if (a[0] === 'illust_id') {
+        u = 'img/search/id/'
+      } else if (a[0] === 'user_id') {
+        u = 'img/search/userid/'
+      } else {
+        this.errorMe()
+        return
+      }
+      this.loading = true
+      let self = this
+      this.$http.get(this.apiUrl + u + b).then(function (response) {
+        self.imgs = response.data
+        self.loading = false
+      })
+    },
+    errorMe () {
+      this.$message({
+        message: '搜索格式错误',
+        type: 'warning'
+      })
     }
   }
 }
