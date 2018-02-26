@@ -16,8 +16,8 @@ Vue.use(VueLazyload, {
   attempt: 1
 })
 Vue.prototype.$http = axios
-Vue.prototype.imgUrl = 'http://localhost:8001/'
-Vue.prototype.apiUrl = 'http://localhost:8000/'
+Vue.prototype.imgUrl = 'http://cll.goloo.cc/'
+Vue.prototype.apiUrl = 'http://cll.goloo.cc:8000/'
 
 Vue.config.productionTip = false
 

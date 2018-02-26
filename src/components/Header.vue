@@ -1,6 +1,6 @@
 <template>
-  <el-header>
-    <el-menu class="el-menu-demo" mode="horizontal" :defaultActive="$route.path" router>
+  <el-header style="height: auto;">
+    <el-menu mode="horizontal" :defaultActive="$route.path" router>
       <el-menu-item index="/">首页</el-menu-item>
       <el-menu-item index="/shuffle">随便一张</el-menu-item>
       <el-menu-item index="/search">Search</el-menu-item>

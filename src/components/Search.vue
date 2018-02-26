@@ -29,7 +29,8 @@ export default {
     return {
       imgs: [],
       illust_id: '',
-      loading: false
+      loading: false,
+      apiUrl: this.apiUrl
     }
   },
   methods: {
@@ -37,7 +38,7 @@ export default {
       this.loading = true
       if (this.illust_id) {
         let self = this
-        this.$http.get('http://localhost:8000/img/id/' + this.illust_id).then(function (response) {
+        this.$http.get(this.apiUrl + 'img/id/' + this.illust_id).then(function (response) {
           self.imgs = response.data
           self.loading = false
         })
