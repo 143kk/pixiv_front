@@ -8,7 +8,7 @@
         <el-button @click="getImgs()" :loading="loading" style="width:98%">查询</el-button>
       </el-col>
     </el-row>
-    <el-table :data="imgs">
+    <el-table :data="imgs.data">
       <el-table-column label="Date" align="center" sortable sort-by="wdate">
         <template slot-scope="scope">
           <router-link :to="'/dayView/' + scope.row.wdate" target="_blank"><el-button type="text">{{scope.row.wdate}}</el-button></router-link>
@@ -21,6 +21,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <p><el-button type="primary" @click="loadMore()" v-show="imgs.next_page_url" :loading="loading2">加载更多</el-button></p>
   </el-main>
 </template>
 <script>
@@ -30,6 +31,7 @@ export default {
       imgs: [],
       param: '',
       loading: false,
+      loading2: false,
       apiUrl: this.apiUrl,
       sortBy: ['rank', 'yes_rank']
     }
@@ -59,6 +61,19 @@ export default {
         self.imgs = response.data
         self.loading = false
       })
+    },
+    loadMore () {
+      if (this.imgs.next_page_url) {
+        this.loading2 = true
+        let self = this
+        this.$http.get(this.imgs.next_page_url).then(function (response) {
+          for (let temp of response.data.data) {
+            self.imgs.data.push(temp)
+          }
+          self.$set(self.imgs, 'next_page_url', response.data.next_page_url)
+          self.loading2 = false
+        })
+      }
     },
     errorMe () {
       this.$message({

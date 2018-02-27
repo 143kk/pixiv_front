@@ -31,6 +31,10 @@ export default new Router({
       component: Search
     },
     {
+      path: '/search/:page',
+      component: Search
+    },
+    {
       path: '/lab',
       component: Lab
     }
