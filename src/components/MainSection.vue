@@ -1,20 +1,20 @@
 <template>
-  <el-main v-if="this.imgs != 0">
-    <router-link :to="'/dayView/' + imgs[0].wdate"><el-button type="text" style="font-size:20px;">Latest - {{imgs[0].wdate}}</el-button></router-link>
+  <el-main v-if="Object.keys(imgs).length">
+    <router-link :to="'/dayView/' + dates[0]"><el-button type="text" style="font-size:20px;">Latest - {{dates[0]}}</el-button></router-link>
     <el-carousel indicator-position="outside" v-if = "calImgs != 0">
       <el-carousel-item v-for="img in calImgs" :key="img._id.$oid">
         <h3>{{ img.title }} <small>#{{img.rank}}</small></h3>
         <img :src="imgUrl + img.path" height="100%">
       </el-carousel-item>
     </el-carousel>
-    <div v-for="img in imgs.slice(1)" style="margin-bottom: 3px" :key="img.wdate">
+    <div v-for="date in dates.slice(1)" style="margin-bottom: 3px" :key="date">
       <div :style="{height: '280px',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
           backgroundSize: 'cover',
-          }" class="coll" v-lazy:background-image="imgUrl + img.path">
+          }" class="coll" v-lazy:background-image="getBgImg(date)">
         <div>
-          <router-link :to="'/dayView/' + img.wdate"><el-button type="primary" class="button">{{img.wdate}}</el-button></router-link>
+          <router-link :to="'/dayView/' + date"><el-button type="primary" class="button">{{date}}</el-button></router-link>
         </div>
       </div>
     </div>
@@ -27,7 +27,7 @@ export default {
     return {
       dates: [],
       calImgs: [],
-      imgs: [],
+      imgs: {},
       page: 1,
       imgUrl: this.imgUrl,
       apiUrl: this.apiUrl,
@@ -36,37 +36,46 @@ export default {
   },
   mounted () {
     this.getLatest()
-    this.getDates()
+    this.getDatesAndImgs()
   },
   methods: {
     getLatest () {
       let self = this
       this.$http.get(this.apiUrl + 'date/latest').then(function (response) {
         let latest = response.data.date
-        self.$http.get(self.apiUrl + 'img/date/' + latest).then(function (response) {
-          self.calImgs = response.data
+        self.$http.get(self.apiUrl + 'img/date/' + latest).then(function (res) {
+          self.calImgs = res.data
         })
       })
     },
-    getDates (page = 1) {
+    getBgImg (date) {
+      if (this.imgs[date] === undefined) {
+        return
+      }
+      return this.imgUrl + this.imgs[date].path
+    },
+    getDatesAndImgs (page = 1) {
       let self = this
       this.$http.get(this.apiUrl + 'date/page/' + page).then(function (response) {
-        self.dates = response.data
-        self.getImgs()
+        for (let a of response.data) {
+          self.dates.push(a.date)
+          self.$http.get(self.apiUrl + 'img/first/' + a.date).then(function (response) {
+            self.$set(self.imgs, a.date, response.data)
+          })
+        }
       })
     },
     getImgs () {
       let self = this
       for (let date of this.dates) {
-        this.$http.get(this.apiUrl + 'img/first/' + date.date).then(function (response) {
-          self.$set(self.imgs, self.i++, response.data)
-          // self.imgs.push(response.data)
+        this.$http.get(this.apiUrl + 'img/first/' + date).then(function (response) {
+          self.$set(self.imgs, date, response.data)
         })
       }
     },
     loadMore () {
       this.page += 1
-      this.getDates(this.page)
+      this.getDatesAndImgs(this.page)
     }
 
   }
